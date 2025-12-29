@@ -1,0 +1,13 @@
+<apex:page standardController="Account" recordSetVar="accounts" extensions="MassUpdateIndustryController">
+    <apex:form >
+        <apex:pageBlock title="Mass Update Industry">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Update Industry" action="{!updateIndustry}" />
+            </apex:pageBlockButtons>
+            <apex:pageBlockTable value="{!selectedAccounts}" var="acc">
+                <apex:column value="{!acc.Name}"/>
+                <apex:column value="{!acc.Industry}"/>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
