@@ -8,6 +8,9 @@ export default class Topicreplication extends LightningElement {
     errorTimeout;
 
     topicInput = '';
+    // Full list of topics (authoritative)
+    allTopics = [];
+    // Filtered/visible topics
     topics = [];
     topicCount = 0;
     errorMessage = '';
@@ -29,14 +32,14 @@ export default class Topicreplication extends LightningElement {
     loadTopics() {
         getTopicField({ recordId: this.recordId })
             .then(result => {
-                this.topics = result
-                    ? result.split(';').map(t => t.trim())
+                this.allTopics = result
+                    ? result.split(';').map(t => t.trim()).filter(t => !!t)
                     : [];
-                this.topicCount = this.topics.length;
+                this.applyFilter();
             })
             .catch(() => {
-                this.topics = [];
-                this.topicCount = 0;
+                this.allTopics = [];
+                this.applyFilter();
             });
     }
 
@@ -56,6 +59,8 @@ export default class Topicreplication extends LightningElement {
     }
 
     this.topicInput = newValue;
+    // Apply client-side search filter on each change
+    this.applyFilter();
 }
 
     handleKeyDown(event) {
@@ -72,7 +77,8 @@ export default class Topicreplication extends LightningElement {
     const newTopic = this.topicInput.trim();
     if (!newTopic) return;
 
-    const exists = this.topics.some(
+    // Check duplicate against the full list
+    const exists = this.allTopics.some(
         t => t.toLowerCase() === newTopic.toLowerCase()
     );
 
@@ -98,17 +104,19 @@ export default class Topicreplication extends LightningElement {
         this.errorTimeout = null;
     }
 
-    // Optimistic UI update
-    this.topics = [...this.topics, newTopic];
-    this.topicCount = this.topics.length;
+    // Optimistic UI update against the full list
+    this.allTopics = [...this.allTopics, newTopic];
+    // Clear input before applying filter (so list re-filters with empty input to show all)
     this.topicInput = '';
+    this.applyFilter();
 
     saveTopics({
         recordId: this.recordId,
         topicInput: newTopic
     }).catch(error => {
-        this.topics = this.topics.filter(t => t !== newTopic);
-        this.topicCount = this.topics.length;
+        // Rollback in full list, then re-apply filter
+        this.allTopics = this.allTopics.filter(t => t !== newTopic);
+        this.applyFilter();
         this.errorMessage =
             error?.body?.message || 'Unable to add topic';
     });
@@ -123,18 +131,34 @@ export default class Topicreplication extends LightningElement {
 
         this.errorMessage = '';
 
-        // Optimistic UI update
-        this.topics = this.topics.filter(t => t !== topicName);
-        this.topicCount = this.topics.length;
+        // Optimistic UI update on the full list
+        this.allTopics = this.allTopics.filter(t => t !== topicName);
+        this.applyFilter();
 
         removeTopic({
             recordId: this.recordId,
             topicName
         }).catch(() => {
-            // Rollback
-            this.topics = [...this.topics, topicName];
-            this.topicCount = this.topics.length;
+            // Rollback on the full list, then re-apply filter
+            this.allTopics = [...this.allTopics, topicName];
+            this.applyFilter();
             this.errorMessage = 'Unable to remove topic';
         });
+    }
+    /* =========================
+       FILTERING
+       ========================= */
+    applyFilter() {
+        const query = (this.topicInput || '').toLowerCase().trim();
+
+        if (!query) {
+            this.topics = this.allTopics.slice();
+        } else {
+            this.topics = this.allTopics.filter(t =>
+                (t || '').toLowerCase().includes(query)
+            );
+        }
+
+        this.topicCount = this.topics.length;
     }
 }
