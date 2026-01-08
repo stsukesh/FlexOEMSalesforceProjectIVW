@@ -12,9 +12,18 @@ trigger AccountTrigger on Account (after insert, after update, before insert, be
     // 2. AFTER CONTEXT
     if (Trigger.isAfter) {
         
-        // A. Update User Account Name
+        // A. Update User Account Name (FIXED FOR ASYNC EXCEPTION)
         if (Trigger.newMap != null && !Trigger.newMap.isEmpty()) {
-            AccountHandler.updateUserAccountName(Trigger.newMap.keySet());
+            Set<Id> accIds = Trigger.newMap.keySet();
+            
+            // Safe Context Check:
+            if (!System.isFuture() && !System.isBatch()) {
+                // Normal execution: Call the required @future method
+                AccountHandler.updateUserAccountName(accIds);
+            } else {
+                // Already in Async: Call the Sync version to prevent Exception
+                AccountHandler.updateUserAccountNameSync(accIds);
+            }
         }
 
         // B. Google Drive Logic & Phone Change Logic
@@ -22,24 +31,17 @@ trigger AccountTrigger on Account (after insert, after update, before insert, be
         Set<Id> accIdsWithPhoneChange = new Set<Id>(); 
 
         for (Account acc : Trigger.new) {
-            // Logic for INSERT
             if (Trigger.isInsert) {
                 idsToProcessGDrive.add(acc.Id);
-                // If phone is provided on creation, you might want to sync it
                 if (acc.Phone != null) {
                     accIdsWithPhoneChange.add(acc.Id);
                 }
             } 
-            // Logic for UPDATE (Safe to use oldMap here)
             else if (Trigger.isUpdate) {
                 Account oldAcc = Trigger.oldMap.get(acc.Id);
-
-                // Check for Name change (Google Drive)
                 if (acc.Name != oldAcc.Name) {
                     idsToProcessGDrive.add(acc.Id);
                 }
-
-                // Check for Phone change (Contact Sync)
                 if (acc.Phone != oldAcc.Phone) {
                     accIdsWithPhoneChange.add(acc.Id);
                 }

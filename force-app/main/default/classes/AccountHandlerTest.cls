@@ -114,9 +114,42 @@ Public with sharing class AccountHandlerTest {
         List<Account> resultList = [SELECT Id FROM Account WHERE ShippingStreet LIKE 'Street %'];
         System.assertEquals(200, resultList.size(), 'All 200 records should have shipping address populated');
     }
-    //=============================================
-    //--END for copy billing -> Shipping addresss--
-    //==============================================
+    //===================================================
+    //--END for copy billing -> Shipping addresss TEST --
+    //===================================================
     
+    /**
+     * ======================================================================================
+     * This below is the methods TESTING for the future method  by the updateUserAccountName 
+     * ======================================================================================
+     */	
     
+   /**
+     * Scenario: Positive Testing (Bulk)
+     * Description: Verifies that the future method successfully updates the User's 
+     * Last_created_Account_Name__c field when valid Account IDs are provided.
+     */
+    @isTest
+    static void testUpdateUserAccountName_Positive() {
+        // Setup: Create test accounts
+        List<Account> accounts = TestObjectFactory.createAccountRecords('Success Account', 5);
+        Set<Id> accountIds = new Map<Id, Account>(accounts).keySet();
+        Id currentUserId = UserInfo.getUserId();
+
+        Test.startTest();
+        // Calling the future method directly
+        AccountHandler.updateUserAccountName(accountIds);
+        Test.stopTest(); // This line forces the future call to complete
+
+        // Verification: Query the user record to check the update
+        User updatedUser = [
+            SELECT Last_created_Account_Name__c 
+            FROM User 
+            WHERE Id = :currentUserId 
+            LIMIT 1
+        ];
+
+        System.assertNotEquals(null, updatedUser.Last_created_Account_Name__c, 'The user field should not be null');
+        System.assertEquals('Success Account 4', updatedUser.Last_created_Account_Name__c, 'The field should contain the name of the last processed account');
+    }
 }

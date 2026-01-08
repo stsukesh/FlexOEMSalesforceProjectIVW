@@ -1,0 +1,53 @@
+<template>
+    <lightning-card>
+        <!-- Header -->
+        <div class="slds-p-horizontal_medium slds-p-top_small">
+            <h2 class="slds-text-heading_medium">
+                # Topics ({topicCount})
+            </h2>
+        </div>
+
+        <!-- Input -->
+        <div class="slds-p-horizontal_medium slds-m-top_small">
+            <lightning-input
+                type="search"
+                placeholder="Type a topic name and press Enter"
+                value={topicInput}
+                onchange={handleChange}
+                onkeydown={handleKeyDown}>
+            </lightning-input>
+
+            <!--  INLINE ERROR (STANDARD TOPIC BEHAVIOR) -->
+            <template if:true={errorMessage}>
+                <div class="slds-text-color_error slds-m-top_x-small">
+                    {errorMessage}
+                </div>
+            </template>
+        </div>
+
+        <!-- Topic Pills -->
+        <div class="slds-p-horizontal_medium slds-m-top_small">
+            <template for:each={topics} for:item="topic">
+                <span
+                    key={topic}
+                    class="slds-pill slds-m-right_x-small slds-m-bottom_x-small">
+
+                    <span class="slds-pill__label">
+                        {topic}
+                    </span>
+
+                    <button
+                        class="slds-button slds-button_icon slds-pill__remove"
+                        data-name={topic}
+                        onclick={handleRemove}
+                        title="Remove">
+                        <lightning-icon
+                            icon-name="utility:close"
+                            size="x-small">
+                        </lightning-icon>
+                    </button>
+                </span>
+            </template>
+        </div>
+    </lightning-card>
+</template>

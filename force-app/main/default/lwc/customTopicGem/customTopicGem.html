@@ -1,0 +1,29 @@
+<template>
+    <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <lightning-icon icon-name="standard:topic" size="small"></lightning-icon>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <span class="slds-text-heading_small">Topics ({topicCount})</span>
+                    </h2>
+                </div>
+            </header>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+            <div class="slds-form-element slds-m-bottom_small">
+                <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_right">
+                    <lightning-icon icon-name="utility:search" size="x-small" class="slds-icon slds-input__icon slds-input__icon_right slds-icon-text-default"></lightning-icon>
+                    <input type="text" 
+                           class="slds-input" 
+                           placeholder="Type a topic name and press Enter" 
+                           oncommit={handleAddTopic}
+                           oninput={handleSearch}/>
+                </div>
+            </div>
+            <lightning-pill-container items={filteredTopics} onitemremove={handleRemove}></lightning-pill-container>
+        </div>
+    </article>
+</template>

@@ -1,37 +1,33 @@
 /**
- * Author: Sukesh Subash
- * Date: 26/12/2025
- * Description: Service class to retrieve and collect IDs of Closed Cases.
- * Test class: AddClosedCasesListTest
+ * @name: AddClosedCasesList
+ * @author: Sukesh Subash
+ * @description: Service class to collect IDs of Closed Cases.
+ * @test class: AddClosedCasesListTest
  */
 public with sharing class AddClosedCasesList {
 
-    private static final String CLASS_NAME = 'AddClosedCasesList';
-
     /**
-     * Method Name: getClosedCaseIds
-     * Description: Queries cases with 'Closed' status and adds their IDs to a Set.
+     * @name: getClosedCaseIds
+     * @description: Returns a set of IDs for all Closed Cases visible to the user
+     * @return Set<Id> - Set of Case IDs
      */
-    public static void getClosedCaseIds() {
-
+    public static Set<Id> getClosedCaseIds() {
+        Set<Id> closedCaseIdsSet = new Set<Id>();
         try {
-            Set<Id> closedCaseIdsSet = new Set<Id>();
-
+            // Assign to List to prevent exceptions, use Security Enforced
             List<Case> closedCasesList = [
                 SELECT Id 
                 FROM Case 
-                WHERE Status = 'Closed'
+                WHERE IsClosed = true 
+                WITH SECURITY_ENFORCED
             ];
             
-            if (!closedCasesList.isEmpty()) {
-                for (Case caseRecord : closedCasesList) {
-                    closedCaseIdsSet.add(caseRecord.Id);
-                }
-                System.debug(LoggingLevel.DEBUG, 'Final Closed Case ID Set: ' + closedCaseIdsSet);
+            for (Case c : closedCasesList) {
+                closedCaseIdsSet.add(c.Id);
             }
         } catch (Exception e) {
-            System.debug(e.getMessage());
+            System.debug(LoggingLevel.ERROR, 'Error: ' + e.getMessage());
         }
-
+        return closedCaseIdsSet;
     }
 }

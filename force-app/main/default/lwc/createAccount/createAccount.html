@@ -1,0 +1,40 @@
+<template>
+    <lightning-card title="Create Account" icon-name="standard:account">
+        <div class="slds-var-m-around_medium">
+            <lightning-record-edit-form 
+                object-api-name="Account" 
+                onsuccess={handleSuccess}
+                onerror={handleError}>
+                
+                <lightning-messages></lightning-messages>
+
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                        <lightning-input-field field-name="Name"></lightning-input-field>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                        <lightning-input-field field-name="AccountNumber"></lightning-input-field>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                        <lightning-input-field field-name="Industry"></lightning-input-field>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                        <lightning-input-field field-name="AnnualRevenue"></lightning-input-field>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-p-around_small">
+                        <lightning-input-field field-name="Rating"></lightning-input-field>
+                    </div>
+                </div>
+
+                <div class="slds-var-m-top_medium slds-align_absolute-center">
+                    <lightning-button 
+                        variant="brand" 
+                        type="submit" 
+                        label="Save Account"
+                        icon-name="utility:save">
+                    </lightning-button>
+                </div>
+            </lightning-record-edit-form>
+        </div>
+    </lightning-card>
+</template>

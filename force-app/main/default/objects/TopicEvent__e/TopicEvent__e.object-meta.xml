@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Platform Event for real-time updates when Topics are created/assigned/removed.</description>
+    <eventType>HighVolume</eventType>
+    <label>Topic Event</label>
+    <pluralLabel>Topic Events</pluralLabel>
+    <publishBehavior>PublishAfterCommit</publishBehavior>
+</CustomObject>

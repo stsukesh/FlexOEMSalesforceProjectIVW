@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Custom Topics</masterLabel>
+    <description>Custom Topics component with case-insensitive create, real-time count, and no navigation on create.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__UtilityBar</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <property name="recordId" type="String" label="Record ID" description="Current record Id" />
+            <objects>
+                <object>Account</object>
+                <object>Contact</object>
+                <object>Lead</object>
+                <object>Opportunity</object>
+                <object>Case</object>
+            </objects>
+        </targetConfig>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__UtilityBar">
+            <property name="recordId" type="String" label="Record ID" description="Optional record Id" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

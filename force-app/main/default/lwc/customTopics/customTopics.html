@@ -1,0 +1,112 @@
+<template>
+    <section class="slds-card">
+        <div class="slds-card__header slds-grid slds-p-around_small">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <lightning-icon icon-name="utility:topic" size="small"></lightning-icon>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <span>Topics</span>
+                    </h2>
+                </div>
+                <div class="slds-no-flex">
+                    <lightning-badge label={countLabel}></lightning-badge>
+                </div>
+            </header>
+        </div>
+
+        <div class="slds-card__body slds-card__body_inner">
+            <div class="slds-grid slds-gutters slds-wrap slds-p-bottom_small">
+                <!-- Left: Assigned Topics + Create -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-4">
+                    <lightning-input type="text"
+                                     class="create-input"
+                                     label="Add topic"
+                                     value={newTopic}
+                                     onchange={handleInputChange}
+                                     onkeydown={handleKeydown}
+                                     placeholder="Search or create a topic"
+                                     message-when-bad-input="Invalid topic name"
+                                     data-role="createInput">
+                    </lightning-input>
+                    <template if:true={showSuggestions}>
+                        <ul class="slds-listbox slds-listbox_vertical slds-dropdown slds-dropdown_fluid" role="listbox" aria-label="Topic suggestions">
+                            <template for:each={suggestions} for:item="sug">
+                                <li key={sug.id}
+                                    class="slds-listbox__item"
+                                    role="presentation"
+                                    onclick={handleSuggestionClick}
+                                    data-id={sug.id}
+                                    data-name={sug.name}>
+                                    <div class="slds-listbox__option slds-listbox__option_plain" role="option">
+                                        <span class="slds-truncate">{sug.name}</span>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <div class="slds-m-top_small">
+                        <lightning-button variant="brand"
+                                          label="Create Topic"
+                                          onclick={handleCreateTopic}
+                                          disabled={createDisabled}>
+                        </lightning-button>
+                    </div>
+                </div>
+
+                <!-- Right: Client-side Search/Filter -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-align_absolute-center">
+                    <lightning-input type="search"
+                                     label="Filter topics"
+                                     placeholder="Filter assigned / available"
+                                     onchange={handleFilterChange}
+                                     value={filterKey}
+                                     class="slds-m-top_large">
+                    </lightning-input>
+                </div>
+            </div>
+
+            <template if:true={topics.length}>
+                <div class="slds-m-top_small slds-grid slds-wrap">
+                    <template for:each={topics} for:item="t">
+                        <template if:true={t.visible}>
+                            <div key={t.id} class="slds-m-right_x-small slds-m-bottom_x-small">
+                                <lightning-pill label={t.name}
+                                                onremove={handleRemove}
+                                                data-id={t.id}>
+                                    <template if:true={t.isFollowed}>
+                                        <lightning-button-icon slot="actions"
+                                                               icon-name="utility:check"
+                                                               size="small"
+                                                               variant="bare"
+                                                               title="Following"
+                                                               data-id={t.id}
+                                                               onclick={handleUnfollow}>
+                                        </lightning-button-icon>
+                                    </template>
+                                    <template if:false={t.isFollowed}>
+                                        <lightning-button-icon slot="actions"
+                                                               icon-name="utility:add"
+                                                               size="small"
+                                                               variant="bare"
+                                                               title="Follow"
+                                                               data-id={t.id}
+                                                               onclick={handleFollow}>
+                                        </lightning-button-icon>
+                                    </template>
+                                </lightning-pill>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:true={noVisible}>
+                        <div class="slds-text-color_weak slds-m-top_small">No topics match your filter.</div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={topics.length}>
+                <div class="slds-text-color_weak">No topics assigned yet.</div>
+            </template>
+        </div>
+    </section>
+</template>
