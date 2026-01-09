@@ -1,53 +1,87 @@
 <template>
-    <lightning-card>
-        <!-- Header -->
-        <div class="slds-p-horizontal_medium slds-p-top_small">
-            <h2 class="slds-text-heading_medium">
-                # Topics ({topicCount})
-            </h2>
-        </div>
-
-        <!-- Input -->
-        <div class="slds-p-horizontal_medium slds-m-top_small">
-            <lightning-input
-                type="search"
-                placeholder="Type a topic name and press Enter"
-                value={topicInput}
-                onchange={handleChange}
-                onkeydown={handleKeyDown}>
-            </lightning-input>
-
-            <!--  INLINE ERROR (STANDARD TOPIC BEHAVIOR) -->
-            <template if:true={errorMessage}>
-                <div class="slds-text-color_error slds-m-top_x-small">
-                    {errorMessage}
+    <lightning-card title="Topic Management" icon-name="standard:topic2" class="slds-is-relative">
+        
+        <template if:true={isLoading}>
+            <div class="slds-show">
+                <div class="slds-backdrop slds-backdrop_open" 
+                    style="position: absolute; background: rgba(255, 255, 255, 0.75); cursor: wait;">
+                    <lightning-spinner 
+                        alternative-text="Processing..." 
+                        size="medium" 
+                        variant="brand">
+                    </lightning-spinner>
                 </div>
+            </div>
+        </template>
+        <!-- Suggestion Box -->
+        <div class="slds-p-horizontal_medium">
+            <div class="slds-form-element">
+                <label class="slds-form-element__label" for="combobox-id-1">
+                    Search or Add Topics ({topicCount})
+                </label>
+                <div class="slds-form-element__control">
+                    <div class="slds-combobox_container">
+                        <div class={comboboxClass} aria-expanded={isDropdownOpen} aria-haspopup="listbox" role="combobox">
+                            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                                <lightning-input
+                                    type="search"
+                                    variant="label-hidden"
+                                    placeholder="Search topics..."
+                                    value={topicInput}
+                                    onchange={handleChange}
+                                    onfocus={handleFocus}
+                                    onblur={handleBlur}
+                                    onkeydown={handleKeyDown}>
+                                </lightning-input>
+                            </div>
+
+                            <template if:true={isDropdownOpen}>
+                                <div id="listbox-id-1" class="slds-dropdown slds-dropdown_fluid" role="listbox">
+                                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                        <template for:each={searchResults} for:item="res">
+                                            <li key={res} role="presentation" class="slds-listbox__item" onmousedown={handleSelect}>
+                                                <div class="slds-media slds-listbox__option slds-listbox__option_plain" role="option" data-value={res}>
+                                                    <span class="slds-media__body">
+                                                        <span class="slds-truncate" title={res}>{res}</span>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                        
+                                        <template if:true={showAddNew}>
+                                            <li role="presentation" class="slds-listbox__item" onmousedown={addTopic}>
+                                                <div class="slds-media slds-listbox__option slds-listbox__option_entity" role="option">
+                                                    <span class="slds-media__figure">
+                                                        <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                                    </span>
+                                                    <span class="slds-media__body">
+                                                        <span class="slds-truncate">Add new topic: <b>{topicInput}</b></span>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <template if:true={errorMessage}>
+                <div class="slds-text-color_error slds-m-top_x-small">{errorMessage}</div>
             </template>
-        </div>
 
-        <!-- Topic Pills -->
-        <div class="slds-p-horizontal_medium slds-m-top_small">
-            <template for:each={topics} for:item="topic">
-                <span
-                    key={topic}
-                    class="slds-pill slds-m-right_x-small slds-m-bottom_x-small">
-
-                    <span class="slds-pill__label">
-                        {topic}
-                    </span>
-
-                    <button
-                        class="slds-button slds-button_icon slds-pill__remove"
-                        data-name={topic}
-                        onclick={handleRemove}
-                        title="Remove">
-                        <lightning-icon
-                            icon-name="utility:close"
-                            size="x-small">
-                        </lightning-icon>
-                    </button>
-                </span>
-            </template>
+            <div class="slds-m-top_medium">
+                <template for:each={topics} for:item="topic">
+                    <lightning-pill 
+                        key={topic} 
+                        label={topic} 
+                        onremove={handleRemove} 
+                        class="slds-m-around_xx-small">
+                    </lightning-pill>
+                </template>
+            </div>
         </div>
     </lightning-card>
 </template>

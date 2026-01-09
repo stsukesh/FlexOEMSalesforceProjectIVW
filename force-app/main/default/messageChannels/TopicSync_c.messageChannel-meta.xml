@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>Topic Sync</masterLabel>
+    <isExposed>true</isExposed>
+    <description>Topic synchronization channel for cross-instance updates of topicreplication LWC</description>
+    <lightningMessageFields>
+        <fieldName>recordId</fieldName>
+        <description>Target record Id</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>action</fieldName>
+        <description>add | remove</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>topicName</fieldName>
+        <description>Topic name</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>timestamp</fieldName>
+        <description>Epoch millis for ordering</description>
+    </lightningMessageFields>
+</LightningMessageChannel>

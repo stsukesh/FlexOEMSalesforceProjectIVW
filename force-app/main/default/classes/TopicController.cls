@@ -1,72 +1,27 @@
 public with sharing class TopicController {
+    private static final String TOPICS_TEXT_FIELD = 'Topics_Text__c';
 
-    /* =========================
-       READ TOPICS
-       ========================= */
     @AuraEnabled(cacheable=true)
-    public static String getTopicField(Id recordId) {
+    public static TopicWrapper getTopicData(Id recordId) {
+        if (recordId == null) return null;
 
-        String objectName =
-            recordId.getSObjectType().getDescribe().getName();
+        String objectName = recordId.getSObjectType().getDescribe().getName();
+        String query = 'SELECT ' + String.escapeSingleQuotes(TOPICS_TEXT_FIELD) + 
+                       ' FROM ' + String.escapeSingleQuotes(objectName) + 
+                       ' WHERE Id = :recordId WITH SECURITY_ENFORCED LIMIT 1';
+        
+        List<SObject> records = Database.query(query);
+        String textValue = records.isEmpty() ? '' : (String)records[0].get(TOPICS_TEXT_FIELD);
+        Integer count = [SELECT COUNT() FROM TopicAssignment WHERE EntityId = :recordId];
 
-        List<Topic_Config__mdt> cfgList = [
-            SELECT Enable_Topics__c, Topic_Field_API__c
-            FROM Topic_Config__mdt
-            WHERE DeveloperName = :objectName
-            LIMIT 1
-        ];
-
-        if (cfgList.isEmpty() || !cfgList[0].Enable_Topics__c) {
-            return null;
-        }
-
-        Topic_Config__mdt cfg = cfgList[0];
-
-        SObject rec = Database.query(
-            'SELECT ' + cfg.Topic_Field_API__c +
-            ' FROM ' + objectName +
-            ' WHERE Id = :recordId'
-        );
-
-        return (String) rec.get(cfg.Topic_Field_API__c);
+        return new TopicWrapper(textValue, count);
     }
 
-    /* =========================
-       ADD TOPIC
-       ========================= */
     @AuraEnabled
     public static void saveTopics(Id recordId, String topicInput) {
-
-        if (String.isBlank(topicInput)) {
-            throw new AuraHandledException('Topic cannot be empty');
-        }
-
-        String objectName =
-            recordId.getSObjectType().getDescribe().getName();
-
-        List<Topic_Config__mdt> cfgList = [
-            SELECT Enable_Topics__c, Topic_Field_API__c
-            FROM Topic_Config__mdt
-            WHERE DeveloperName = :objectName
-            LIMIT 1
-        ];
-
-        if (cfgList.isEmpty() || !cfgList[0].Enable_Topics__c) {
-            throw new AuraHandledException('Topics are disabled');
-        }
-
-        Topic_Config__mdt cfg = cfgList[0];
-
-        String normalized = topicInput.trim().toLowerCase();
-
-        // Get or create Topic
+        String normalized = topicInput.trim();
         Topic topicRec;
-        List<Topic> existing = [
-            SELECT Id
-            FROM Topic
-            WHERE Name = :normalized
-            LIMIT 1
-        ];
+        List<Topic> existing = [SELECT Id FROM Topic WHERE Name = :normalized LIMIT 1];
 
         if (existing.isEmpty()) {
             topicRec = new Topic(Name = normalized);
@@ -75,77 +30,48 @@ public with sharing class TopicController {
             topicRec = existing[0];
         }
 
-        // Prevent duplicate assignment
-        Integer cnt = [
-            SELECT COUNT()
-            FROM TopicAssignment
-            WHERE EntityId = :recordId
-            AND TopicId = :topicRec.Id
-        ];
-
-        if (cnt > 0) {
-            throw new AuraHandledException('Topic already exists');
+        Integer cnt = [SELECT COUNT() FROM TopicAssignment WHERE EntityId = :recordId AND TopicId = :topicRec.Id];
+        if (cnt == 0) {
+            insert new TopicAssignment(EntityId = recordId, TopicId = topicRec.Id);
         }
-
-        insert new TopicAssignment(
-            EntityId = recordId,
-            TopicId  = topicRec.Id
-        );
-
-        updateTopicText(recordId, cfg.Topic_Field_API__c);
+        updateTopicText(recordId);
     }
 
-    /* =========================
-       REMOVE TOPIC
-       ========================= */
     @AuraEnabled
     public static void removeTopic(Id recordId, String topicName) {
-
-        delete [
-            SELECT Id
-            FROM TopicAssignment
-            WHERE EntityId = :recordId
-            AND Topic.Name = :topicName
-        ];
-
-        String objectName =
-            recordId.getSObjectType().getDescribe().getName();
-
-        List<Topic_Config__mdt> cfgList = [
-            SELECT Topic_Field_API__c
-            FROM Topic_Config__mdt
-            WHERE DeveloperName = :objectName
-            LIMIT 1
-        ];
-
-        if (!cfgList.isEmpty()) {
-            updateTopicText(recordId, cfgList[0].Topic_Field_API__c);
-        }
+        delete [SELECT Id FROM TopicAssignment WHERE EntityId = :recordId AND Topic.Name = :topicName];
+        updateTopicText(recordId);
     }
 
-    /* =========================
-       UPDATE LONG TEXT AREA
-       ========================= */
-    private static void updateTopicText(
-        Id recordId,
-        String fieldApi
-    ) {
-        List<TopicAssignment> tas = [
-            SELECT Topic.Name
-            FROM TopicAssignment
-            WHERE EntityId = :recordId
-            ORDER BY CreatedDate
-        ];
-
+    private static void updateTopicText(Id recordId) {
+        List<TopicAssignment> tas = [SELECT Topic.Name FROM TopicAssignment WHERE EntityId = :recordId ORDER BY CreatedDate ASC];
         List<String> names = new List<String>();
         for (TopicAssignment ta : tas) {
             names.add(ta.Topic.Name);
         }
 
-        SObject rec =
-            recordId.getSObjectType().newSObject(recordId);
-
-        rec.put(fieldApi, String.join(names, '; '));
+        SObject rec = recordId.getSObjectType().newSObject(recordId);
+        rec.put(TOPICS_TEXT_FIELD, String.join(names, '; '));
         update rec;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<String> searchGlobalTopics(String searchTerm) {
+        if (String.isBlank(searchTerm) || searchTerm.length() < 2) return new List<String>();
+        String queryTerm = '%' + searchTerm.trim() + '%';
+        List<String> results = new List<String>();
+        for (Topic t : [SELECT Name FROM Topic WHERE Name LIKE :queryTerm LIMIT 5]) {
+            results.add(t.Name);
+        }
+        return results;
+    }
+
+    public class TopicWrapper {
+        @AuraEnabled public String topicText { get; set; }
+        @AuraEnabled public Integer totalCount { get; set; }
+        public TopicWrapper(String text, Integer count) {
+            this.topicText = text;
+            this.totalCount = count;
+        }
     }
 }

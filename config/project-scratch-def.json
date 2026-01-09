@@ -3,6 +3,10 @@
   "edition": "Developer",
   "features": ["EnableSetPasswordInApi"],
   "settings": {
+     "lightningSettings": {
+    "enableLightningPreviewPref": true
+  },
+
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true
     },
