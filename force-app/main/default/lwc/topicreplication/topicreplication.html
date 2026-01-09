@@ -1,6 +1,18 @@
 <template>
-    <lightning-card title="Topic Management" icon-name="standard:topic2" class="slds-is-relative">
-        
+    <lightning-card class="slds-is-relative">
+        <div class="slds-p-horizontal_medium slds-p-vertical_small slds-grid slds-grid_vertical-align-center">
+            <div class="slds-m-right_small">
+                <lightning-icon 
+                    icon-name="standard:topic2" 
+                    size="small" 
+                    alternative-text="Topics">
+                </lightning-icon>
+            </div>
+            <h2 class="slds-text-heading_large slds-text-title_bold">
+                Topics ({topicCount})
+            </h2>
+        </div>
+
         <template if:true={isLoading}>
             <div class="slds-show">
                 <div class="slds-backdrop slds-backdrop_open" 
@@ -13,12 +25,9 @@
                 </div>
             </div>
         </template>
-        <!-- Suggestion Box -->
+
         <div class="slds-p-horizontal_medium">
             <div class="slds-form-element">
-                <label class="slds-form-element__label" for="combobox-id-1">
-                    Search or Add Topics ({topicCount})
-                </label>
                 <div class="slds-form-element__control">
                     <div class="slds-combobox_container">
                         <div class={comboboxClass} aria-expanded={isDropdownOpen} aria-haspopup="listbox" role="combobox">
@@ -26,7 +35,7 @@
                                 <lightning-input
                                     type="search"
                                     variant="label-hidden"
-                                    placeholder="Search topics..."
+                                    placeholder="Type a topic name, use the arrow keys to select your topic, then press Enter."
                                     value={topicInput}
                                     onchange={handleChange}
                                     onfocus={handleFocus}
@@ -72,7 +81,7 @@
                 <div class="slds-text-color_error slds-m-top_x-small">{errorMessage}</div>
             </template>
 
-            <div class="slds-m-top_medium">
+            <div class="slds-m-top_medium slds-p-bottom_medium">
                 <template for:each={topics} for:item="topic">
                     <lightning-pill 
                         key={topic} 
