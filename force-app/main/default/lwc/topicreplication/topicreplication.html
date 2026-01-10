@@ -14,15 +14,13 @@
         </div>
 
         <template if:true={isLoading}>
-            <div class="slds-show">
-                <div class="slds-backdrop slds-backdrop_open" 
-                    style="position: absolute; background: rgba(255, 255, 255, 0.75); cursor: wait;">
-                    <lightning-spinner 
-                        alternative-text="Processing..." 
-                        size="medium" 
-                        variant="brand">
-                    </lightning-spinner>
-                </div>
+            <div class="slds-backdrop slds-backdrop_open" 
+                style="position: absolute; background: rgba(255, 255, 255, 0.75); cursor: wait; z-index: 999;">
+                <lightning-spinner 
+                    alternative-text="Processing..." 
+                    size="medium" 
+                    variant="brand">
+                </lightning-spinner>
             </div>
         </template>
 
@@ -35,7 +33,7 @@
                                 <lightning-input
                                     type="search"
                                     variant="label-hidden"
-                                    placeholder="Type a topic name, use the arrow keys to select your topic, then press Enter."
+                                    placeholder="Type a topic name..."
                                     value={topicInput}
                                     onchange={handleChange}
                                     onfocus={handleFocus}
@@ -56,7 +54,6 @@
                                                 </div>
                                             </li>
                                         </template>
-                                        
                                         <template if:true={showAddNew}>
                                             <li role="presentation" class="slds-listbox__item" onmousedown={addTopic}>
                                                 <div class="slds-media slds-listbox__option slds-listbox__option_entity" role="option">
@@ -82,14 +79,35 @@
             </template>
 
             <div class="slds-m-top_medium slds-p-bottom_medium">
-                <template for:each={topics} for:item="topic">
-                    <lightning-pill 
-                        key={topic} 
-                        label={topic} 
-                        onremove={handleRemove} 
-                        class="slds-m-around_xx-small">
-                    </lightning-pill>
-                </template>
+                <div class="slds-flex-wrap slds-grid">
+                    <template for:each={visibleTopics} for:item="topic">
+                        <lightning-pill 
+                            key={topic} 
+                            label={topic} 
+                            onremove={handleRemove} 
+                            class="slds-m-around_xx-small">
+                        </lightning-pill>
+                    </template>
+                </div>
+
+                <div class="slds-m-top_x-small">
+                    <template if:true={showMoreButton}>
+                        <lightning-button 
+                            variant="base" 
+                            label="Show More" 
+                            icon-name="utility:chevrondown" 
+                            onclick={handleToggleExpand}>
+                        </lightning-button>
+                    </template>
+                    <template if:true={showLessButton}>
+                        <lightning-button 
+                            variant="base" 
+                            label="Show Less" 
+                            icon-name="utility:chevronup" 
+                            onclick={handleToggleExpand}>
+                        </lightning-button>
+                    </template>
+                </div>
             </div>
         </div>
     </lightning-card>

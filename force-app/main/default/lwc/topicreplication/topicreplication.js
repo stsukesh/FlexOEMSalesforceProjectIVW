@@ -12,7 +12,9 @@ export default class Topicreplication extends LightningElement {
     @track searchResults = [];
     @track isLoading = false; 
     @track errorMessage = '';
+    @track isExpanded = false;
     
+    INITIAL_LIMIT = 10;
     topicInput = '';
     isDropdownOpen = false;
     wiredTopicResponse; 
@@ -41,7 +43,29 @@ export default class Topicreplication extends LightningElement {
     get showAddNew() {
         return this.topicInput?.length > 1 && !this.topics.includes(this.topicInput);
     }
+    /**
+     * Getter to return the list of topics to display based on expansion state
+     */
+    get visibleTopics() {
+        if (this.isExpanded || this.topics.length <= this.INITIAL_LIMIT) {
+            return this.topics;
+        }
+        return this.topics.slice(0, this.INITIAL_LIMIT);
+    }
 
+    get showMoreButton() {
+        return !this.isExpanded && this.topics.length > this.INITIAL_LIMIT;
+    }
+
+    get showLessButton() {
+        return this.isExpanded && this.topics.length > this.INITIAL_LIMIT;
+    }
+
+    handleToggleExpand() {
+        this.isExpanded = !this.isExpanded;
+    }
+
+    
     handleChange(event) {
         this.topicInput = event.target.value;
         this.isDropdownOpen = true;
